@@ -1,15 +1,28 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Settings } from 'lucide-react'
+import { Settings, ShieldCheck } from 'lucide-react'
 import SignOutButton from './SignOutButton'
 import Providers from './Providers'
 import ThemeToggle from './ThemeToggle'
+
+const SUPERADMIN = 'mauriciolima1998@gmail.com'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
+
+  const isSuperAdmin = user.email === SUPERADMIN
+
+  if (!isSuperAdmin) {
+    const { data: authorized } = await supabase
+      .from('authorized_emails')
+      .select('email')
+      .eq('email', user.email)
+      .single()
+    if (!authorized) redirect('/unauthorized')
+  }
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -31,6 +44,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
           <div className="flex items-center gap-1">
             <ThemeToggle />
+
+            {isSuperAdmin && (
+              <Link
+                href="/admin"
+                className="w-9 h-9 flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 transition-colors"
+                aria-label="Admin"
+              >
+                <ShieldCheck size={17} />
+              </Link>
+            )}
 
             <Link
               href="/settings"
