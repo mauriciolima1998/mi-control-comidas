@@ -1,7 +1,14 @@
-import Link from 'next/link'
+'use client'
+
+import { useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { ShieldOff } from 'lucide-react'
 
 export default function UnauthorizedPage() {
+  useEffect(() => {
+    createClient().auth.signOut()
+  }, [])
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
       <div className="text-center max-w-sm">
@@ -12,9 +19,12 @@ export default function UnauthorizedPage() {
         <p className="text-sm text-slate-500 mb-6">
           Tu cuenta no tiene permiso para acceder a esta aplicación. Contactá al administrador.
         </p>
-        <Link href="/" className="text-sm text-blue-500 hover:text-blue-700 font-medium">
-          Volver al inicio
-        </Link>
+        <a
+          href="/"
+          className="inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
+        >
+          Intentar con otra cuenta
+        </a>
       </div>
     </div>
   )
